@@ -1,155 +1,181 @@
-import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookDashed, Search, Tags } from "lucide-react";
-import { useGenres } from "../hooks/useGenres";
-import GenreCard from "../components/GenreCard";
+import { useEffect, useMemo, useState } from "react";
+import { getGenres } from "../services/genresService";
 
 const Genres = () => {
-  const { genres, loading, error } = useGenres();
+  const [genres, setGenres] = useState([]);
+  const [search, setSearch] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState("All");
 
-  const [query, setQuery] = useState("");
-  const [activeTheme, setActiveTheme] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const themes = useMemo(() => {
-    const set = new Set();
-    genres.forEach((g) => (g.commonThemes || []).forEach((t) => set.add(t)));
-    return ["All", ...Array.from(set)];
+useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await getGenres();
+        setGenres(data);
+      } catch (err) {
+        setError(err?.message || "Something went wrong fetching genres.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGenres();
+  }, []);
+
+  const themeOptions = useMemo(() => {
+    const themeSet = new Set();
+    genres.forEach((g) => {
+      (g.commonThemes || []).forEach((t) => themeSet.add(t));
+    });
+    return ["All", ...Array.from(themeSet).sort()];
   }, [genres]);
 
+  // Filter genres by search and theme
   const filteredGenres = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = search.trim().toLowerCase();
 
     return genres.filter((g) => {
-      const matchesQuery =
+      const matchesSearch =
         !q ||
         g.name?.toLowerCase().includes(q) ||
-        g.description?.toLowerCase().includes(q) ||
-        (g.popularAnime || []).some((a) => a.toLowerCase().includes(q)) ||
-        (g.commonThemes || []).some((t) => t.toLowerCase().includes(q));
+        g.description?.toLowerCase().includes(q);
 
       const matchesTheme =
-        activeTheme === "All" || (g.commonThemes || []).includes(activeTheme);
+        selectedTheme === "All" ||
+        (g.commonThemes || []).includes(selectedTheme);
 
-      return matchesQuery && matchesTheme;
+      return matchesSearch && matchesTheme;
     });
-  }, [genres, query, activeTheme]);
-
-  const handleView = (genre) => {
-    // will use navigate(`/genres/${genre.slug}`) when adding routes
-    console.log("View genre:", genre);
-  };
+  }, [genres, search, selectedTheme]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white overflow-hidden pt-24 pb-16 px-6 sm:px-8 lg:px-10">
+    <main className="py-16 sm:py-20 px-6 sm:px-10 lg:px-12">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10 sm:mb-14">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/5 border border-white/10 mb-5">
-            <BookDashed className="w-7 h-7 text-blue-400" />
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-12">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold">
             <span className="bg-gradient-to-b from-white to-gray-300 bg-clip-text text-transparent">
-              Explore Anime
-            </span>
-            <br />
-            <span className="bg-gradient-to-b from-blue-400 to-cyan-300 bg-clip-text text-transparent">
-              Genres
+              Browse Genres
             </span>
           </h1>
-
-          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
-            Search, filter by themes, and find a genre that matches your vibe.
+          <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
+            Explore categories and jump into a vibe. Click any genre to see full
+            details.
           </p>
         </div>
 
         {/* Controls */}
-        <div className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 mb-8">
-          <div className="flex items-center gap-3 bg-slate-950/40 border border-white/10 rounded-xl px-4 py-3 focus-within:border-blue-400/40 transition">
-            <Search className="w-5 h-5 text-blue-400" />
+        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-8">
+          {/* Search */}
+          <div className="w-full md:max-w-md">
+            <label className="block text-sm text-gray-300 mb-2">Search</label>
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search genres, themes, or anime..."
-              className="w-full bg-transparent outline-none text-gray-200 placeholder:text-gray-500"
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search genres (e.g., adventure, comedy)..."
+              className="w-full bg-slate-900/60 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
             />
           </div>
 
-          <div className="mt-5">
-            <div className="flex items-center gap-2 text-sm text-gray-300 mb-3">
-              <Tags className="w-4 h-4 text-blue-400" />
-              <span className="font-semibold">Filter by Theme</span>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {themes.map((t) => {
-                const isActive = t === activeTheme;
-
-                return (
-                  <button
-                    key={t}
-                    onClick={() => setActiveTheme(t)}
-                    className={`text-xs px-3 py-1 rounded-full border transition-all duration-300 ${
-                      isActive
-                        ? "bg-white/10 border-white/20 text-white"
-                        : "bg-slate-800/40 border-white/10 text-gray-300 hover:bg-white/5"
-                    }`}
-                  >
-                    {t}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Theme filter */}
+          <div className="w-full md:w-64">
+            <label className="block text-sm text-gray-300 mb-2">
+              Filter by Theme
+            </label>
+            <select
+              value={selectedTheme}
+              onChange={(e) => setSelectedTheme(e.target.value)}
+              className="w-full bg-slate-900/60 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            >
+              {themeOptions.map((t) => (
+                <option key={t} value={t} className="bg-slate-950">
+                  {t}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* States */}
+        {/* Loading / Error */}
         {loading && (
-          <div className="text-center text-gray-400">Loading genres...</div>
-        )}
-
-        {error && (
-          <div className="text-center text-red-300">
-            {error}{" "}
-            <span className="text-gray-400">
-              (When your API is ready, this will help debug fetch issues.)
-            </span>
+          <div className="text-center text-gray-400 py-16">
+            Loading genres...
           </div>
         )}
 
+        {!loading && error && (
+          <div className="text-center py-16">
+            <p className="text-red-400 font-semibold mb-2">Error</p>
+            <p className="text-gray-400">{error}</p>
+          </div>
+        )}
+
+        {/* Grid */}
         {!loading && !error && (
           <>
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-gray-400 text-sm">
-                Showing{" "}
-                <span className="text-white font-semibold">
-                  {filteredGenres.length}
-                </span>{" "}
-                genre{filteredGenres.length === 1 ? "" : "s"}
-              </p>
+            {filteredGenres.length === 0 ? (
+              <div className="text-center text-gray-400 py-16">
+                No genres matched your filters.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredGenres.map((g) => (
+                  <Link
+                    key={g.slug}
+                    to={`/genres/${g.slug}`}
+                    className="group relative bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:bg-slate-900/70 hover:border-white/20"
+                  >
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl bg-gradient-to-br from-blue-500/10 via-transparent to-cyan-500/10 pointer-events-none" />
 
-              <Link
-                to="/"
-                className="text-blue-400 hover:text-blue-300 text-sm font-semibold"
-              >
-                Back to Home
-              </Link>
-            </div>
+                    <h2 className="text-2xl font-bold mb-2">{g.name}</h2>
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-3">
+                      {g.description}
+                    </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredGenres.map((g) => (
-                <GenreCard key={g.slug || g.name} genre={g} onView={handleView} />
-              ))}
-            </div>
+                    {/* Themes pills */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(g.commonThemes || []).slice(0, 5).map((theme) => (
+                        <span
+                          key={theme}
+                          className="text-xs bg-slate-800/80 border border-white/10 px-3 py-1 rounded-full text-gray-200"
+                        >
+                          {theme}
+                        </span>
+                      ))}
+                    </div>
 
-            {filteredGenres.length === 0 && (
-              <div className="mt-10 text-center text-gray-400">
-                No matches. Try a different search or theme filter.
+                    <div className="mt-auto flex items-center justify-between text-sm">
+                      <span className="text-gray-400">
+                        Popular:{" "}
+                        <span className="text-gray-200">
+                          {(g.popularAnime || []).slice(0, 1)[0] || "—"}
+                        </span>
+                      </span>
+                      <span className="text-blue-400 group-hover:text-blue-300 font-semibold">
+                        View →
+                      </span>
+                    </div>
+                  </Link>
+                ))}
               </div>
             )}
           </>
         )}
+
+        {/* Footer link back home (optional) */}
+        <div className="mt-12 text-center">
+          <Link to="/" className="text-gray-400 hover:text-gray-200">
+            ← Back Home
+          </Link>
+        </div>
       </div>
-    </div>
+    </main>
   );
 };
 
