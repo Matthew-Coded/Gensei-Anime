@@ -1,8 +1,8 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Features from "./components/Features";
-import Pricing from "./components/Pricing";
-import Testimonials from "./components/Testimonials";
+import Genre from "./components/Genre";
+import Login from "./components/Login";
 import Footer from "./components/Footer";
 
 
@@ -11,8 +11,8 @@ function App() {
     <Navbar />
     <Hero />
     <Features />
-    <Pricing />
-    <Testimonials />
+    <Genre />
+    <Login />
     <Footer />
   </div>;
 }

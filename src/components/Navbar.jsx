@@ -36,14 +36,14 @@ const Navbar = () => {
                         href='#pricing'
                         className='text-gray-300 hover:text-white text-sm lg:text-base'
                     >
-                        Pricing
+                        Genre
                     </a>
 
                     <a
                         href='#testimonials'
                         className='text-gray-300 hover:text-white text-sm lg:text-base'
                     >
-                        Testimonials
+                        Login
                     </a>
                 </div>
 
@@ -77,7 +77,7 @@ const Navbar = () => {
                         onClick={() => setMobileMenuIsOpen(false)}
                         className='block text-gray-300 hover:text-white text-sm lg:text-base'
                     >
-                        Pricing
+                        Genre
                     </a>
 
                     <a
@@ -85,7 +85,7 @@ const Navbar = () => {
                         onClick={() => setMobileMenuIsOpen(false)}
                         className='block text-gray-300 hover:text-white text-sm lg:text-base'
                     >
-                        Testimonials
+                        Login
                     </a>
                 </div>
             </div>}
