@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { getGenres } from "../services/genresService";
+import { getGenreBySlug } from "../services/genresService";
 
-export const useGenres = () => {
-  const [genres, setGenres] = useState([]);
+export const useGenre = (slug) => {
+  const [genre, setGenre] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!slug) return;
+
     let isMounted = true;
 
     const load = async () => {
@@ -14,11 +16,11 @@ export const useGenres = () => {
         setLoading(true);
         setError("");
 
-        const data = await getGenres();
+        const data = await getGenreBySlug(slug);
 
-        if (isMounted) setGenres(data || []);
+        if (isMounted) setGenre(data || null);
       } catch (err) {
-        if (isMounted) setError(err?.message || "Failed to load genres");
+        if (isMounted) setError(err?.message || "Something went wrong");
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -29,7 +31,7 @@ export const useGenres = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [slug]);
 
-  return { genres, loading, error };
+  return { genre, loading, error };
 };

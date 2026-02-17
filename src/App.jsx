@@ -2,14 +2,14 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Genres from "./pages/Genres";
+import GenreDetails from "./pages/GenreDetails";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import GenreDetails from "./pages/GenreDetails";
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-slate-950 text-white overflow-hidden">
+      <div className="min-h-screen bg-slate-950 text-white">
         <Navbar />
 
         <Routes>

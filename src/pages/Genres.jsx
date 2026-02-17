@@ -1,31 +1,17 @@
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import { getGenres } from "../services/genresService";
+import { useMemo, useState } from "react";
+import { useGenres } from "../hooks/useGenres";
+
+
 
 const Genres = () => {
-  const [genres, setGenres] = useState([]);
   const [search, setSearch] = useState("");
+
   const [selectedTheme, setSelectedTheme] = useState("All");
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { genres, loading, error } = useGenres();
 
-useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const data = await getGenres();
-        setGenres(data);
-      } catch (err) {
-        setError(err?.message || "Something went wrong fetching genres.");
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchGenres();
-  }, []);
 
   const themeOptions = useMemo(() => {
     const themeSet = new Set();
@@ -127,7 +113,7 @@ useEffect(() => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredGenres.map((g) => (
                   <Link
-                    key={g.slug}
+                    key={g.id}
                     to={`/genres/${g.slug}`}
                     className="group relative bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:bg-slate-900/70 hover:border-white/20"
                   >
