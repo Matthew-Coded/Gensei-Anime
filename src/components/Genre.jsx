@@ -1,4 +1,5 @@
 import { BookDashed, LineSquiggle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Genre = () => {
   const genre = [
@@ -95,7 +96,7 @@ const Genre = () => {
 
   return (
     <section
-      id="commonThemes"
+      id="genre"
       className="py-16 sm:py-20 px-10 sm:px-6 lg:px-8 relative"
     >
       <div className="max-w-7xl mx-auto">
@@ -169,9 +170,9 @@ const Genre = () => {
         <div className="mt-8 sm:mt-12 text-center">
           <p className="text-gray-400 text-xl">
             Want more Genres?{" "}
-            <a href="#" className="text-blue-400 hover:text-blue-300">
+            <Link to="/genres" className="text-blue-400 hover:text-blue-300">
               Click Here!
-            </a>
+            </Link>
           </p>
         </div>
       </div>
